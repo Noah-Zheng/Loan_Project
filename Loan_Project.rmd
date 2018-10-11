@@ -19,6 +19,24 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Question
 It is so hard to ask the right question. Assume I was a lender. What I care about is the risk of a list and the yield. When I was browsing the lists, what factor should I care most? Is expected return reliable? The income of the borrower information is not reliable as borrower would likely to appreciate their income in order to get a loan. Therefore, reliable factors, such as state, credit profile, term, prosperscore, inquiriesLast6Months/TotalInquiries (too much inquiries might indicate high risk), currentDelinquencies, totalProsperLoans,   should be choosen. 
+
+5 CreditGrade
+6 Term
+7 LoanStatus
+11 LeanderYield
+16 ProsperRating(Alpha)
+17 ProsperScore
+18 ListingCategory
+19 BorrowerState
+29 FirstRecordedCreditLine
+33 OpenRevolvingAccounts
+36 TotalInquiries
+37 CurrentDelinquencies
+39 DelinquenciesLast7Years
+65 LoanOriginalAmount
+66 LoanOriginationDate
+82 Investors
+
 1. Which state are more liable?
 2. 
 3. Which month has the highest demand of loan (out of curiosity)
@@ -41,5 +59,10 @@ range(dd$LoanOriginationDate)
 
 ```{r}
 #Select data, trim the date with only date
+col_index <- c(5,6,7,11,16,17,18,19,29,33,36,37,39,65,66,82)
+col_index <- col_index - 1
+dd_s <- dd[, col_index]
+
+summary(dd_s)
 ```
 
