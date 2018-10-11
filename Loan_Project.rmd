@@ -8,3 +8,38 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 
+# Loan Project 
+
+## Background Information 
+
+## Source 
+1. https://en.wikipedia.org/wiki/Prosper_Marketplace#cite_note-Prosper_Marketplace,_Inc-6 
+2. https://docs.google.com/spreadsheets/d/1gDyi_L4UvIrLTEC6Wri5nbaMmkGmLQBk-Yx3z0XDEtI/edit#gid=0 
+3. https://www.wikihow.com/Invest-on-Prosper.com
+
+## Question
+It is so hard to ask the right question. Assume I was a lender. What I care about is the risk of a list and the yield. When I was browsing the lists, what factor should I care most? Is expected return reliable? The income of the borrower information is not reliable as borrower would likely to appreciate their income in order to get a loan. Therefore, reliable factors, such as state, credit profile, term, prosperscore, inquiriesLast6Months/TotalInquiries (too much inquiries might indicate high risk), currentDelinquencies, totalProsperLoans,   should be choosen. 
+1. Which state are more liable?
+2. 
+3. Which month has the highest demand of loan (out of curiosity)
+4. The relationship between Loan status and ProsperRating
+5. Predict LenderYield 
+6. Can I just rely on teh credit profile to lend money? (analyse the relatinship between credit score and loan status)
+7. High rish high return? (low credit score, loan status bad?)
+8. 
+
+
+```{r}
+dd <- read.csv("prosperLoanData.csv")
+str(dd)
+head(dd)
+summary(dd$ListingCreationDate)
+str(dd$ListingCreationDate)
+summary(dd$LoanOriginationDate)
+range(dd$LoanOriginationDate)
+```
+
+```{r}
+#Select data, trim the date with only date
+```
+
