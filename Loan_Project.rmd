@@ -11,6 +11,7 @@ knitr::opts_chunk$set(echo = TRUE)
 # Loan Project 
 
 ## Background Information 
+The dataset is from Prosper...
 
 ## Source 
 1. https://en.wikipedia.org/wiki/Prosper_Marketplace#cite_note-Prosper_Marketplace,_Inc-6 
@@ -20,22 +21,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ## Question
 It is so hard to ask the right question. Assume I was a lender. What I care about is the risk of a list and the yield. When I was browsing the lists, what factor should I care most? Is expected return reliable? The income of the borrower information is not reliable as borrower would likely to appreciate their income in order to get a loan. Therefore, reliable factors, such as state, credit profile, term, prosperscore, inquiriesLast6Months/TotalInquiries (too much inquiries might indicate high risk), currentDelinquencies, totalProsperLoans,   should be choosen. 
 
-5 CreditGrade
-6 Term
-7 LoanStatus
-11 LeanderYield
-16 ProsperRating(Alpha)
-17 ProsperScore
-18 ListingCategory
-19 BorrowerState
-29 FirstRecordedCreditLine
-33 OpenRevolvingAccounts
-36 TotalInquiries
-37 CurrentDelinquencies
-39 DelinquenciesLast7Years
-65 LoanOriginalAmount
-66 LoanOriginationDate
-82 Investors
+
 
 1. Which state are more liable?
 2. 
@@ -49,20 +35,129 @@ It is so hard to ask the right question. Assume I was a lender. What I care abou
 
 ```{r}
 dd <- read.csv("prosperLoanData.csv")
-str(dd)
-head(dd)
-summary(dd$ListingCreationDate)
-str(dd$ListingCreationDate)
-summary(dd$LoanOriginationDate)
-range(dd$LoanOriginationDate)
 ```
 
+
+### variables of interest
+
+6 Term
+7 LoanStatus
+11 LeanderYield
+15 ProsperRating(numeric)
+65 LoanOriginalAmount 
+
 ```{r}
-#Select data, trim the date with only date
-col_index <- c(5,6,7,11,16,17,18,19,29,33,36,37,39,65,66,82)
+#Select columns
+col_index <- c(6,7,11,15,65)
 col_index <- col_index - 1
 dd_s <- dd[, col_index]
 
+
+names(dd_s)
+
+#change column name "ProsperRating(numeric)" to "ProsperRating"
+colnames(dd_s)[4] = "ProsperRating"
+
+#select data after 2009
+dd_s <- subset(dd_s, !is.na(ProsperRating))
+```
+
+```{r echo=FALSE, message=False, warning=FALSE, structure of the data}
+str(dd_s)
 summary(dd_s)
+```
+
+```{r echo=FALSE, message=False, warning=FALSE, univariate plot}
+#ggpair
+library(ggplot2)
+library(GGally)
+ggpairs(dd_s)
+ggsave("univariateplot.png")
+
+```
+
+It seems there is no relationship between the yield and loan term.
+There is a strong negative relationship between ProsperRating and LenderYield.
+There is negative relationship between the loan amount and yield.
+Loan amount and rating has positive relationship.
+
+
+
+```{r echo=FALSE, message=False, warning=FALSE}
+ggplot(dd_s, aes(x = ProsperRating)) +
+  geom_histogram()
+```
+
+The distribution of rating is close to a normal distribution.
+
+```{r echo=FALSE, message=False, warning=FALSE}
+ggplot(dd_s, aes(ProsperRating, LenderYield)) +
+  geom_point(alpha = 1/50, position = position_jitter())
+```
+
+It can be noticed that the yield decreases when rating increases. 
+
+
+```{r echo=FALSE, message=False, warning=FALSE}
+ggplot(dd_s, aes(ProsperRating, LenderYield)) +
+  geom_line(stat = "summary", fun.y = "mean")
+```
+
+A strong negative relationship between the yield and rating
+
+```{r echo=FALSE, message=False, warning=FALSE}
+ggplot(dd_s, aes(ProsperRating, LenderYield)) +
+  geom_line(aes(color = LoanStatus), stat = "summary", fun.y = mean)
+```
+
+
+```{r}
+#combine all past due in one. 
+dd_s$Status <- dd_s$LoanStatus
+str(dd_s)
+levels(dd_s$Status)["Past Due" %in% levels(dd_s$Status)] <- "Past Due"
+levels(dd_s$Status)[7:12] <- "Past Due"
+levels(dd_s$Status)
+```
+
+
+```{r}
+ggplot(dd_s, aes(ProsperRating, LenderYield)) +
+  geom_line(aes(color = Status), stat = "summary", fun.y = mean)
+```
+
+```{r echo=FALSE, message=False, warning=FALSE}
+ggplot(dd_s, aes(LoanOriginalAmount, LenderYield)) +
+  geom_point(alpha = 1/50, position = position_jitter())+
+  geom_line(stat = "summary", fun.y= "median", color = "orange") +
+  geom_smooth(color = "red")
+```
+
+
+
+
+```{r echo=FALSE, message=False, warning=FALSE}
+qplot(data=dd_s, LenderYield) +
+  facet_wrap(~Status, scales="free")
+```
+
+```{r echo=FALSE, message=False, warning=FALSE}
+ggplot(dd_s, aes(ProsperRating, LoanOriginalAmount)) +
+  geom_point()
+```
+
+
+
+```{r echo=FALSE, message=False, warning=FALSE}
+ggplot(dd_s, aes(ProsperRating, LoanOriginalAmount)) +
+  geom_line(stat = "summary", fun.y = "mean")
+```
+
+The larger the loan, the higher the rating.
+
+
+```{r}
+ggplot(dd_s, aes(ProsperRating, LoanOriginalAmount)) +
+  geom_line(aes(color = Status), stat = "summary", fun.y = "mean")
 ```
 
