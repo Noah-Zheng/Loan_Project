@@ -4,14 +4,14 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE)
 ```
 
 
 # Loan Project 
 
 ## Background Information 
-The dataset is from Prosper...
+The dataset is from Prosper, an American company in the peer-to-peer lending industry. Prosper maintains a full public database of all loans issued through its marketplace on its website. This database and all market statistics can be accessed and queried for analysis of loan performance over time. 
 
 ## Source 
 1. https://en.wikipedia.org/wiki/Prosper_Marketplace#cite_note-Prosper_Marketplace,_Inc-6 
@@ -19,26 +19,10 @@ The dataset is from Prosper...
 3. https://www.wikihow.com/Invest-on-Prosper.com
 
 ## Question
-It is so hard to ask the right question. Assume I was a lender. What I care about is the risk of a list and the yield. When I was browsing the lists, what factor should I care most? Is expected return reliable? The income of the borrower information is not reliable as borrower would likely to appreciate their income in order to get a loan. Therefore, reliable factors, such as state, credit profile, term, prosperscore, inquiriesLast6Months/TotalInquiries (too much inquiries might indicate high risk), currentDelinquencies, totalProsperLoans,   should be choosen. 
+It is so hard to ask a good question. 
+As a defensive investor, I would like to know the relationship between the Prosper rating and yield which should be nagative.  
 
-
-
-1. Which state are more liable?
-2. 
-3. Which month has the highest demand of loan (out of curiosity)
-4. The relationship between Loan status and ProsperRating
-5. Predict LenderYield 
-6. Can I just rely on teh credit profile to lend money? (analyse the relatinship between credit score and loan status)
-7. High rish high return? (low credit score, loan status bad?)
-8. 
-
-
-```{r}
-dd <- read.csv("prosperLoanData.csv")
-```
-
-
-### variables of interest
+The income of the borrower is not reliable as borrowers would likely to overstate their income in order to get a loan. Therefore, the following factors are choosen.  
 
 6 Term
 7 LoanStatus
@@ -46,12 +30,18 @@ dd <- read.csv("prosperLoanData.csv")
 15 ProsperRating(numeric)
 65 LoanOriginalAmount 
 
+
+
+```{r import the data}
+dd <- read.csv("prosperLoanData.csv")
+```
+
+
 ```{r}
 #Select columns
 col_index <- c(6,7,11,15,65)
 col_index <- col_index - 1
 dd_s <- dd[, col_index]
-
 
 names(dd_s)
 
@@ -76,12 +66,10 @@ ggsave("univariateplot.png")
 
 ```
 
-It seems there is no relationship between the yield and loan term.
-There is a strong negative relationship between ProsperRating and LenderYield.
-There is negative relationship between the loan amount and yield.
-Loan amount and rating has positive relationship.
-
-
+1. It seems there is no relationship between the yield and loan term.
+2. There is a strong negative relationship between ProsperRating and LenderYield.
+3. There is negative relationship between the loan amount and yield.
+4. Loan amount and rating has positive relationship.
 
 ```{r echo=FALSE, message=False, warning=FALSE}
 ggplot(dd_s, aes(x = ProsperRating)) +
@@ -95,7 +83,7 @@ ggplot(dd_s, aes(ProsperRating, LenderYield)) +
   geom_point(alpha = 1/50, position = position_jitter())
 ```
 
-It can be noticed that the yield decreases when rating increases. 
+It can be noticed that the yield decreases when rating increases. Listings with 1 and 4 have noticiable yield differ from the majority.
 
 
 ```{r echo=FALSE, message=False, warning=FALSE}
@@ -103,7 +91,7 @@ ggplot(dd_s, aes(ProsperRating, LenderYield)) +
   geom_line(stat = "summary", fun.y = "mean")
 ```
 
-A strong negative relationship between the yield and rating
+A strong negative relationship between the average yield and rating exists. 
 
 ```{r echo=FALSE, message=False, warning=FALSE}
 ggplot(dd_s, aes(ProsperRating, LenderYield)) +
@@ -112,11 +100,12 @@ ggplot(dd_s, aes(ProsperRating, LenderYield)) +
 
 
 ```{r}
-#combine all past due in one. 
+#combine all past dues in one level 
 dd_s$Status <- dd_s$LoanStatus
-str(dd_s)
-levels(dd_s$Status)["Past Due" %in% levels(dd_s$Status)] <- "Past Due"
+#find out the index of the past due levels
+levels(dd_s$Status)
 levels(dd_s$Status)[7:12] <- "Past Due"
+#check the result
 levels(dd_s$Status)
 ```
 
@@ -126,6 +115,7 @@ ggplot(dd_s, aes(ProsperRating, LenderYield)) +
   geom_line(aes(color = Status), stat = "summary", fun.y = mean)
 ```
 
+
 ```{r echo=FALSE, message=False, warning=FALSE}
 ggplot(dd_s, aes(LoanOriginalAmount, LenderYield)) +
   geom_point(alpha = 1/50, position = position_jitter())+
@@ -133,7 +123,7 @@ ggplot(dd_s, aes(LoanOriginalAmount, LenderYield)) +
   geom_smooth(color = "red")
 ```
 
-
+No pattern.
 
 
 ```{r echo=FALSE, message=False, warning=FALSE}
@@ -141,23 +131,28 @@ qplot(data=dd_s, LenderYield) +
   facet_wrap(~Status, scales="free")
 ```
 
-```{r echo=FALSE, message=False, warning=FALSE}
-ggplot(dd_s, aes(ProsperRating, LoanOriginalAmount)) +
-  geom_point()
-```
-
-
+There is a relative big number of listings with yield more than 0.3 in all the
+loan status levels except current. 
 
 ```{r echo=FALSE, message=False, warning=FALSE}
 ggplot(dd_s, aes(ProsperRating, LoanOriginalAmount)) +
-  geom_line(stat = "summary", fun.y = "mean")
+  geom_point(alpha = 1/50, position = position_jitter())
 ```
 
-The larger the loan, the higher the rating.
+Listings with high risk tends to have low amount that that with low risk. 
+
+```{r echo=FALSE, message=False, warning=FALSE}
+ggplot(dd_s, aes(ProsperRating, LoanOriginalAmount)) +
+  geom_line(stat = "summary", fun.y = "mean") +
+  ylim(0,quantile(dd_s$LoanOriginalAmount, .99))
+```
+
+The average loan amount for listings with rating of 1 is around 3000, increasing to more than 10000 with rating 4. 
 
 
 ```{r}
 ggplot(dd_s, aes(ProsperRating, LoanOriginalAmount)) +
-  geom_line(aes(color = Status), stat = "summary", fun.y = "mean")
+  geom_line(aes(color = Status), stat = "summary", fun.y = "mean") +
+  ylim(0,quantile(dd_s$LoanOriginalAmount, .99))
 ```
 
