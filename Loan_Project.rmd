@@ -20,7 +20,7 @@ The dataset is from Prosper, an American company in the peer-to-peer lending ind
 
 ## Question
 It is so hard to ask a good question. 
-As a defensive investor, I would like to know the relationship between the Prosper rating and yield which should be nagative.  
+As a defensive investor, I would like to know the relationship between the Prosper rating and yield which I expect to be nagative.  
 
 The income of the borrower is not reliable as borrowers would likely to overstate their income in order to get a loan. Therefore, the following factors are choosen.  
 
@@ -30,9 +30,10 @@ The income of the borrower is not reliable as borrowers would likely to overstat
 15 ProsperRating(numeric)
 65 LoanOriginalAmount 
 
+## Exploring
 
-
-```{r import the data}
+```{r}
+#import the data
 dd <- read.csv("prosperLoanData.csv")
 
 ```
@@ -69,14 +70,50 @@ ggsave("univariateplot.png")
 2. There is a strong negative relationship between ProsperRating and LenderYield.
 3. There is negative relationship between the loan amount and yield.
 4. Loan amount and rating has positive relationship.
+ 
 
+Have a look at the term of loan.
+```{r}
+#bar plot of terms
+ggplot(dd_s, aes(x=factor(Term))) +
+  geom_bar()
+```
+The majority of loans are with a term of 36 months.
+
+ 
+How about loan amount.
 ```{r message=FALSE, warning=FALSE}
-ggplot(dd_s, aes(x = ProsperRating)) +
+#plot of LoanOriginalAmount
+ggplot(dd_s, aes(x = LoanOriginalAmount)) +
   geom_histogram()
 ```
+It shows a right skewed trend.
 
+ 
+Add a non-linear scaling
+```{r}
+ggplot(dd_s, aes(x = LoanOriginalAmount)) +
+  geom_histogram() +
+  scale_x_log10()
+```
+It is close to one bell shape after using non-linear scaling. 
+ 
+How about the distibution of yield.
+
+```{r message=FALSE, warning=FALSE}
+ggplot(dd_s, aes(x = LenderYield)) +
+  geom_histogram()
+```
+The distribution of LenderYield is like a normal distribution.
+
+Take a look at the rating.
+```{r}
+ggplot(dd_s, aes(x=factor(ProsperRating))) +
+  geom_bar()
+```
 The distribution of rating is close to a normal distribution.
 
+The relationship between the yield and rating.
 ```{r message=FALSE, warning=FALSE}
 ggplot(dd_s, aes(ProsperRating, LenderYield)) +
   geom_point(alpha = 1/50, position = position_jitter())
@@ -84,7 +121,7 @@ ggplot(dd_s, aes(ProsperRating, LenderYield)) +
 
 It can be noticed that the yield decreases when rating increases. Listings with 1 and 4 have noticiable yield differ from the majority.
 
-
+A line plot to show the trend.
 ```{r message=FALSE, warning=FALSE}
 ggplot(dd_s, aes(ProsperRating, LenderYield)) +
   geom_line(stat = "summary", fun.y = "mean")
@@ -92,11 +129,14 @@ ggplot(dd_s, aes(ProsperRating, LenderYield)) +
 
 A strong negative relationship between the average yield and rating exists. 
 
+Group by different loan status.
 ```{r message=FALSE, warning=FALSE}
 ggplot(dd_s, aes(ProsperRating, LenderYield)) +
   geom_line(aes(color = LoanStatus), stat = "summary", fun.y = mean)
 ```
 
+
+Too many lines. Group all the past due into one catagory.
 
 ```{r}
 #combine all past dues in one level 
@@ -108,75 +148,112 @@ levels(dd_s$Status)[7:12] <- "Past Due"
 levels(dd_s$Status)
 ```
 
-
+Line plot wiht one past due.
 ```{r}
 ggplot(dd_s, aes(ProsperRating, LenderYield)) +
   geom_line(aes(color = Status), stat = "summary", fun.y = mean)
 ```
+Different status shows the same trend.
 
 
+Exploring the relationship between yield and loan amount.
+```{r}
+#scatter plot of the relationship between yield and loan amount
+ggplot(dd_s, aes(LoanOriginalAmount, LenderYield)) +
+  geom_point(alpha = 1/50, position = position_jitter())
+```
+The average yield seems to decrease when the amount increases. 
+
+
+Add a smooth line in the scatter plot. 
 ```{r message=FALSE, warning=FALSE}
+#add a smooth line in the scatter plot 
 ggplot(dd_s, aes(LoanOriginalAmount, LenderYield)) +
   geom_point(alpha = 1/50, position = position_jitter())+
-  geom_line(stat = "summary", fun.y= "median", color = "orange") +
   geom_smooth(color = "red")
 ```
 
 No pattern.
 
-
+Exploring the distribution of yield in different loan status.
 ```{r message=FALSE, warning=FALSE}
 qplot(data=dd_s, LenderYield) +
   facet_wrap(~Status, scales="free")
 ```
 
-There is a relative big number of listings with yield more than 0.3 in all the
-loan status levels except current. 
+There is a relative big number of listings with yield more than 0.3 in all the loan status levels except current. 
 
+
+The relationship between loan amount and rating.
 ```{r message=FALSE, warning=FALSE}
 ggplot(dd_s, aes(ProsperRating, LoanOriginalAmount)) +
   geom_point(alpha = 1/50, position = position_jitter())
 ```
 
 Listings with high risk tends to have low amount that that with low risk. 
-
+ 
+Use line pot to see the trend.
 ```{r message=FALSE, warning=FALSE}
 ggplot(dd_s, aes(ProsperRating, LoanOriginalAmount)) +
   geom_line(stat = "summary", fun.y = "mean") +
   ylim(0,quantile(dd_s$LoanOriginalAmount, .99))
 ```
-
 The average loan amount for listings with rating of 1 is around 3000, increasing to more than 10000 with rating 4. 
 
-
+Group by loan status.
 ```{r message=FALSE, warning=FALSE}
 ggplot(dd_s, aes(ProsperRating, LoanOriginalAmount)) +
   geom_line(aes(color = Status), stat = "summary", fun.y = "mean") +
   ylim(0,quantile(dd_s$LoanOriginalAmount, .99))
 ```
 
-## Plot 1
-```{r message=FALSE, warning=FALSE}
-ggplot(dd_s, aes(ProsperRating, LenderYield)) +
-  geom_line(aes(color = Status), stat = "summary", fun.y = mean)
-```
 
-As guessed in the question part, there is a strong negative relationship between the rating and yield, highest rating with lowest yield. All status show the same trend.
-
-## Plot 2
-```{r message=FALSE, warning=FALSE}
-qplot(data=dd_s, LenderYield) +
-  facet_wrap(~Status, scales="free")
-```
-
-It is interesting to find that in teh completed and current status, there is quit an amount of listings with 0.3 yield. 
-
-## Plot 3
-```{r message=FALSE, warning=FALSE}
+```{r}
 ggplot(dd_s, aes(ProsperRating, LoanOriginalAmount)) +
   geom_point(alpha = 1/100, position = position_jitter()) +
   geom_line(aes(color = Status), stat = "summary", fun.y = "mean") +
   ylim(0,quantile(dd_s$LoanOriginalAmount, .99))
 ```
+Put together the point plot and line plot to show the relationship between loan amount and prosper rating. 
+
+## Final Plots and Summary
+
+### Plot 1
+```{r message=FALSE, warning=FALSE}
+ggplot(dd_s, aes(ProsperRating, LenderYield)) +
+  geom_line(aes(color = Status), stat = "summary", fun.y = mean)+
+  ggtitle("Relationship Between Yield and Rating") +
+  ylab("LenderYield(%)")
+
+```
+
+As guessed in the question part, there is a strong negative relationship between the rating and yield, highest rating with lowest yield. All status show the same trend.
+
+### Plot 2
+```{r message=FALSE, warning=FALSE}
+qplot(data=dd_s, LenderYield) +
+  facet_wrap(~Status, scales="free")+
+  ggtitle("LenderYield in Different Status") +
+  ylab("count")
+```
+
+High yield means high risk. Therefore, there can be expected more loan with high yield in status of charged off, defaulted and past due.  It is interesting to find that in the completed and current status, there is quit an amount of listings with 0.3 yield.
+
+### Plot 3
+```{r message=FALSE, warning=FALSE}
+ggplot(dd_s, aes(ProsperRating, LoanOriginalAmount)) +
+  geom_point(alpha = 1/100, position = position_jitter()) +
+  geom_line(aes(color = Status), stat = "summary", fun.y = "mean") +
+  ylim(0,quantile(dd_s$LoanOriginalAmount, .99)) +
+  ggtitle("Relationship Between Loan Amount and Rating") +
+  ylab("Loan Amount(USD)")
+```
 
 Listing with low risk will have higher average loan amount.
+
+## Reflection
+It is very hard to ask a beautiful question. The main question in this analysis is very simple: the relationship between the lender yield and prosper rating of the loan. As expected, it is a negative relationship.  
+ 
+It is hard to find other meaningful insights into the relatinships between those variables. It is intersting to find out that there is a positive relationship between the loan amount and rating. I expected that lower amount has higher rating. Then I put myself in the shoes of a borrower and I realised that I will only borrow large amount of money when I am confident that I will get the loan which means I assess myself with a higher rating and lower risk. 
+ 
+
