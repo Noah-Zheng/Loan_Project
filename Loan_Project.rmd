@@ -32,14 +32,14 @@ The income of the borrower is not reliable as borrowers would likely to overstat
 
 ## Exploring
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 #import the data
 dd <- read.csv("prosperLoanData.csv")
 
 ```
 
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 #Select columns
 library(dplyr)
 dd_s <- select(dd, "Term","LoanStatus","LenderYield","ProsperRating..numeric.","LoanOriginalAmount")
@@ -50,12 +50,14 @@ colnames(dd_s)[4] = "ProsperRating"
 #select data after 2009
 dd_s <- subset(dd_s, !is.na(ProsperRating))
 ```
+### The Structure of the Data 
 
 ```{r message=FALSE, warning=FALSE}
 #structure of the data
 str(dd_s)
 summary(dd_s)
 ```
+### GGplot of all variables 
 
 ```{r message=FALSE, warning=FALSE}
 #ggpair, univariate plot
@@ -65,6 +67,7 @@ ggpairs(dd_s)
 ggsave("univariateplot.png")
 
 ```
+Observations: 
 
 1. It seems there is no relationship between the yield and loan term.
 2. There is a strong negative relationship between ProsperRating and LenderYield.
@@ -72,100 +75,115 @@ ggsave("univariateplot.png")
 4. Loan amount and rating has positive relationship.
  
 
-Have a look at the term of loan.
+### The Term of Loans 
+
 ```{r}
 #bar plot of terms
 ggplot(dd_s, aes(x=factor(Term))) +
   geom_bar()
 ```
+ 
 The majority of loans are with a term of 36 months.
 
  
-How about loan amount.
+### Loan Amount 
+
 ```{r message=FALSE, warning=FALSE}
 #plot of LoanOriginalAmount
 ggplot(dd_s, aes(x = LoanOriginalAmount)) +
   geom_histogram()
 ```
-It shows a right skewed trend.
+ 
+It shows a right skewed trend. 
 
  
-Add a non-linear scaling
-```{r}
+Add a non-linear scaling to the plot 
+
+```{r message=FALSE, warning=FALSE}
 ggplot(dd_s, aes(x = LoanOriginalAmount)) +
   geom_histogram() +
   scale_x_log10()
 ```
+ 
 It is close to one bell shape after using non-linear scaling. 
  
-How about the distibution of yield.
+### The Distibution of Yield 
 
 ```{r message=FALSE, warning=FALSE}
 ggplot(dd_s, aes(x = LenderYield)) +
   geom_histogram()
 ```
+ 
 The distribution of LenderYield is like a normal distribution.
 
-Take a look at the rating.
+### Prosper Rating 
+
 ```{r}
 ggplot(dd_s, aes(x=factor(ProsperRating))) +
   geom_bar()
 ```
+ 
 The distribution of rating is close to a normal distribution.
 
-The relationship between the yield and rating.
+### The Relationship between the Yield and Rating 
+
 ```{r message=FALSE, warning=FALSE}
 ggplot(dd_s, aes(ProsperRating, LenderYield)) +
   geom_point(alpha = 1/50, position = position_jitter())
 ```
+ 
+It can be noticed that the yield decreases when rating increases. Listings with 1 and 4 have noticiable yield differ from the majority. 
 
-It can be noticed that the yield decreases when rating increases. Listings with 1 and 4 have noticiable yield differ from the majority.
+A line plot to show the trend. 
 
-A line plot to show the trend.
 ```{r message=FALSE, warning=FALSE}
 ggplot(dd_s, aes(ProsperRating, LenderYield)) +
   geom_line(stat = "summary", fun.y = "mean")
 ```
-
+ 
 A strong negative relationship between the average yield and rating exists. 
 
-Group by different loan status.
+Group by different loan status. 
+
 ```{r message=FALSE, warning=FALSE}
 ggplot(dd_s, aes(ProsperRating, LenderYield)) +
   geom_line(aes(color = LoanStatus), stat = "summary", fun.y = mean)
 ```
-
-
+ 
 Too many lines. Group all the past due into one catagory.
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 #combine all past dues in one level 
 dd_s$Status <- dd_s$LoanStatus
 #find out the index of the past due levels
-levels(dd_s$Status)
+#levels(dd_s$Status)
 levels(dd_s$Status)[7:12] <- "Past Due"
 #check the result
-levels(dd_s$Status)
+#levels(dd_s$Status)
 ```
+ 
+Line plot wiht one past due. 
 
-Line plot wiht one past due.
 ```{r}
 ggplot(dd_s, aes(ProsperRating, LenderYield)) +
   geom_line(aes(color = Status), stat = "summary", fun.y = mean)
 ```
+ 
 Different status shows the same trend.
 
 
-Exploring the relationship between yield and loan amount.
+### Exploring theRrelationship between Yield and Loan Amount 
+
 ```{r}
 #scatter plot of the relationship between yield and loan amount
 ggplot(dd_s, aes(LoanOriginalAmount, LenderYield)) +
   geom_point(alpha = 1/50, position = position_jitter())
 ```
+ 
 The average yield seems to decrease when the amount increases. 
 
-
 Add a smooth line in the scatter plot. 
+
 ```{r message=FALSE, warning=FALSE}
 #add a smooth line in the scatter plot 
 ggplot(dd_s, aes(LoanOriginalAmount, LenderYield)) +
@@ -173,9 +191,10 @@ ggplot(dd_s, aes(LoanOriginalAmount, LenderYield)) +
   geom_smooth(color = "red")
 ```
 
-No pattern.
+No clear pattern.
 
-Exploring the distribution of yield in different loan status.
+### Exploring the Distribution of Yield in Different Loan Status. 
+
 ```{r message=FALSE, warning=FALSE}
 qplot(data=dd_s, LenderYield) +
   facet_wrap(~Status, scales="free")
@@ -184,7 +203,8 @@ qplot(data=dd_s, LenderYield) +
 There is a relative big number of listings with yield more than 0.3 in all the loan status levels except current. 
 
 
-The relationship between loan amount and rating.
+### The Relationship between Loan Amount and Rating. 
+
 ```{r message=FALSE, warning=FALSE}
 ggplot(dd_s, aes(ProsperRating, LoanOriginalAmount)) +
   geom_point(alpha = 1/50, position = position_jitter())
@@ -193,14 +213,17 @@ ggplot(dd_s, aes(ProsperRating, LoanOriginalAmount)) +
 Listings with high risk tends to have low amount that that with low risk. 
  
 Use line pot to see the trend.
+
 ```{r message=FALSE, warning=FALSE}
 ggplot(dd_s, aes(ProsperRating, LoanOriginalAmount)) +
   geom_line(stat = "summary", fun.y = "mean") +
   ylim(0,quantile(dd_s$LoanOriginalAmount, .99))
 ```
+
 The average loan amount for listings with rating of 1 is around 3000, increasing to more than 10000 with rating 4. 
 
 Group by loan status.
+
 ```{r message=FALSE, warning=FALSE}
 ggplot(dd_s, aes(ProsperRating, LoanOriginalAmount)) +
   geom_line(aes(color = Status), stat = "summary", fun.y = "mean") +
@@ -208,12 +231,13 @@ ggplot(dd_s, aes(ProsperRating, LoanOriginalAmount)) +
 ```
 
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 ggplot(dd_s, aes(ProsperRating, LoanOriginalAmount)) +
   geom_point(alpha = 1/100, position = position_jitter()) +
   geom_line(aes(color = Status), stat = "summary", fun.y = "mean") +
   ylim(0,quantile(dd_s$LoanOriginalAmount, .99))
 ```
+
 Put together the point plot and line plot to show the relationship between loan amount and prosper rating. 
 
 ## Final Plots and Summary
