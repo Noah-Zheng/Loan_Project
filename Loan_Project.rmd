@@ -4,7 +4,7 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE)
 ```
 
 
@@ -34,16 +34,14 @@ The income of the borrower is not reliable as borrowers would likely to overstat
 
 ```{r import the data}
 dd <- read.csv("prosperLoanData.csv")
+
 ```
 
 
 ```{r}
 #Select columns
-col_index <- c(6,7,11,15,65)
-col_index <- col_index - 1
-dd_s <- dd[, col_index]
-
-names(dd_s)
+library(dplyr)
+dd_s <- select(dd, "Term","LoanStatus","LenderYield","ProsperRating..numeric.","LoanOriginalAmount")
 
 #change column name "ProsperRating(numeric)" to "ProsperRating"
 colnames(dd_s)[4] = "ProsperRating"
