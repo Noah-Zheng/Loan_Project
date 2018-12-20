@@ -4,7 +4,7 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(fig.width=9,fig.height=5,fig.path='Figs/',
+knitr::opts_chunk$set(fig.width=10,fig.height=7,fig.path='Figs/',
                       fig.align='center',tidy=TRUE,
                       echo=FALSE,warning=FALSE,message=FALSE)
 ```
@@ -110,10 +110,8 @@ ggplot(dd_s, aes(x = ListingCreationDate)) +
 
 ```
 
-It can be noticed that there is a big drop in listing from 2008-09. It takes almost 3 years for the listing to recover to 2008-07 level. What happened in September of 2008 relating to finance is the collapse of Lehman Brothers on September 15. Another information is of interest is that the Prosper rating is introduced in July 2009, when the listing starts to increase. Another sharp decline happened in 2014-03. It can be explored further if interested.
+It can be noticed that there is a big drop in listing from 2008-09. It takes almost 3 years for the listing to recover to 2008-07 level. What happened in September of 2008 relating to finance is the collapse of Lehman Brothers on September 15. Another information is of interest is that the Prosper rating is introduced in July 2009, when the listing starts to increase. Another sharp decline happened in 2014-03. It can be explored further with other information. 
 
-
- 
 
 ### The Term of Loans 
 
@@ -123,10 +121,138 @@ ggplot(dd_s, aes(x=factor(Term))) +
   geom_bar()
 ```
  
-The majority of loans are with a term of 36 months.
+The majority of loans are with a term of 36 months. Loans with 12 months are quite small. Around 25000 loans are with a 60 months term. 
 
+
+#### Loan Status
+```{r}
+ggplot(dd_s, aes(x = LoanStatus)) +
+  geom_bar() + 
+  geom_text(stat = 'count', aes(label = ..count..), vjust=-1) +
+  ggpubr::rotate_x_text()
+```
+
+The majority of loans are current. The second is completed. The third is charged off. The fourth is defaulted. 
+
+
+#### The Borrower Rate
+
+```{r}
+ggplot(dd_s, aes(x = BorrowerRate)) +
+  geom_histogram()
+```
+
+The distribution of borrower rate is right skewed with median 0.1840 < mean 0.1928. 
+
+```{r}
+summary(dd_s$BorrowerRate)
+```
+
+
+#### Lender Yield
+```{r}
+ggplot(dd_s, aes(x = LenderYield)) +
+  geom_histogram()
+```
+
+As lender yield is equal to the interest rate on the loan less the servicing fee, the shape is essentially the same as borrower rate. 
+
+```{r}
+summary(dd_s$LenderYield)
+```
+
+#### Prosper Rating 
+
+```{r}
+ggplot(dd_s, aes(x=factor(ProsperRating..numeric.))) +
+  geom_bar()
+```
  
-### Loan Amount 
+The distribution of rating is close to a normal distribution except for the NA which is because that the Prosper rating is introduced in July 2009.
+
+#### Prosper Score
+```{r}
+ggplot(dd_s, aes(x = ProsperScore)) +
+  geom_histogram() +
+  scale_x_continuous(breaks = seq(1,11,1))
+```
+
+```{r}
+summary(dd_s$ProsperScore)
+```
+
+The distributinon of Prosper Score is of bell shape with a median of 6 and mean of 5.95.
+
+
+#### Listing Category
+
+The category of the listing that the borrower selected when posting their listing: 0 - Not Available, 1 - Debt Consolidation, 2 - Home Improvement, 3 - Business, 4 - Personal Loan, 5 - Student Use, 6 - Auto, 7- Other, 8 - Baby&Adoption, 9 - Boat, 10 - Cosmetic Procedure, 11 - Engagement Ring, 12 - Green Loans, 13 - Household Expenses, 14 - Large Purchases, 15 - Medical/Dental, 16 - Motorcycle, 17 - RV, 18 - Taxes, 19 - Vacation, 20 - Wedding Loans   
+
+```{r}
+#https://stackoverflow.com/questions/10002536/how-do-i-replace-numeric-codes-with-value-labels-from-a-lookup-table
+
+a <- 0:20
+names(a) <- c('Not Available', 'Debt Consolidation', 'Home Improvement', 'Business', 'Personal Loan', 'Student Use', 'Auto', 'Other', 'Baby&Adoption', 'Boat', 'Cosmetic Procedure', 'Engagement Ring', 'Green Loans', 'Household Expenses', 'Large Purchases', 'Medical/Dental', 'Motorcycle', 'RV', 'Taxes', 'Vacation', 'Wedding Loans')
+
+dd_s$ListingCategory..numeric. <- names(a)[match(dd_s$ListingCategory..numeric., a)]
+```
+
+
+```{r}
+#https://stackoverflow.com/questions/37853539/how-to-draw-sorted-frequency-barplot-with-ggplot-in-r
+
+ggplot(dd_s, aes(x = reorder(ListingCategory..numeric., ListingCategory..numeric., function(x) -length(x)))) +
+  geom_bar() +
+  xlab("Category") +
+  ggpubr::rotate_x_text()
+
+```
+
+Most of the listing falls in Debt Consolidation.
+
+
+#### Borrowing State
+
+```{r}
+ggplot(dd_s, 
+       aes(x=reorder(BorrowerState, BorrowerState, function(x) - length(x))
+           )
+       ) +
+  xlab('state') +
+  geom_bar()
+```
+
+California has the most listings. 
+
+#### Borrower a Home Owner
+
+```{r}
+ggplot(dd_s, aes(x = IsBorrowerHomeowner)) +
+  geom_bar()
+
+```
+
+```{r}
+summary(dd_s$IsBorrowerHomeowner)
+```
+
+There are around 1000 more home owners.
+
+#### Debt to Income Ratio
+
+```{r}
+ggplot(dd_s, aes(x = DebtToIncomeRatio)) +
+  geom_histogram()
+```
+
+```{r}
+summary(dd_s$DebtToIncomeRatio)
+```
+
+More than 75% of the listings have a debt to income ratio less than 0.32.
+
+
+#### Loan Amount 
 
 ```{r }
 #plot of LoanOriginalAmount
@@ -134,36 +260,30 @@ ggplot(dd_s, aes(x = LoanOriginalAmount)) +
   geom_histogram()
 ```
  
-It shows a right skewed trend. 
 
- 
-Add a non-linear scaling to the plot 
-
-```{r }
-ggplot(dd_s, aes(x = LoanOriginalAmount)) +
-  geom_histogram() +
-  scale_x_log10()
-```
- 
-It is close to one bell shape after using non-linear scaling. 
- 
-### The Distibution of Yield 
-
-```{r }
-ggplot(dd_s, aes(x = LenderYield)) +
-  geom_histogram()
-```
- 
-The distribution of LenderYield is like a normal distribution.
-
-### Prosper Rating 
 
 ```{r}
-ggplot(dd_s, aes(x=factor(ProsperRating))) +
-  geom_bar()
+summary(dd_s$LoanOriginalAmount)
 ```
+
  
-The distribution of rating is close to a normal distribution.
+It shows a right skewed trend, mean 8447 > median 6500. 
+
+#### Investors
+```{r}
+ggplot(dd_s, aes(x = Investors)) +
+  geom_histogram()
+```
+
+```{r}
+summary(dd_s$Investors)
+```
+
+It is right skewed with a median of 44 and mean of 80.48.
+
+
+### Univariate Analysis
+
 
 ### The Relationship between the Yield and Rating 
 
@@ -212,7 +332,7 @@ ggplot(dd_s, aes(ProsperRating, LenderYield)) +
 Different status shows the same trend.
 
 
-### Exploring theRrelationship between Yield and Loan Amount 
+### Exploring the Rrelationship between Yield and Loan Amount 
 
 ```{r}
 #scatter plot of the relationship between yield and loan amount
