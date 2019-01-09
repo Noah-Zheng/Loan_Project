@@ -39,19 +39,19 @@ From Udacity:
 
 ### Main Features of Interest
 
-ListingCreationDate
-Term
-LoanStatus
-BorrowerRate
-LeanderYield
-ProsperRating(numeric)
-ProsperScore
-ListingCategory
-BorrowerState
-IsBorrowerHomeowner
-DebtToIncomeRatio
-LoanOriginalAmount 
-Investors
+- ListingCreationDate
+- Term
+- LoanStatus
+- BorrowerRate
+- LeanderYield
+- ProsperRating(numeric)
+- ProsperScore
+- ListingCategory
+- BorrowerState
+- IsBorrowerHomeowner
+- DebtToIncomeRatio
+- LoanOriginalAmount 
+- Investors
 
 
 ## Exploratory Analysis
@@ -95,7 +95,7 @@ library(anytime)
 dd_s$ListingCreationDate <- anytime(dd_s$ListingCreationDate)
 dd_s$ListingCreationDate <- as.Date(dd_s$ListingCreationDate, format = "%Y/%m")
 
-str(dd_s)
+#str(dd_s)
 
 #https://stackoverflow.com/questions/11748384/formatting-dates-on-x-axis-in-ggplot2
 #https://stackoverflow.com/questions/41855673/r-ggplot-display-all-dates-on-x-axis
@@ -183,12 +183,11 @@ ggplot(dd_s, aes(x = ProsperScore)) +
   scale_x_continuous(breaks = seq(1,11,1))
 ```
 
+The distributinon of Prosper Score is of bell shape with a median of 6 and mean of 5.95.
+
 ```{r}
 summary(dd_s$ProsperScore)
 ```
-
-The distributinon of Prosper Score is of bell shape with a median of 6 and mean of 5.95.
-
 
 #### Listing Category
 
@@ -214,7 +213,7 @@ ggplot(dd_s, aes(x = reorder(ListingCategory..numeric., ListingCategory..numeric
 
 ```
 
-Most of the listing falls in Debt Consolidation.
+Most of the listing falls in Debt Consolidation. The second category that is useful is Home Improvement. The third is Business. 
 
 
 #### Borrowing State
@@ -229,7 +228,7 @@ ggplot(dd_s,
   geom_bar()
 ```
 
-California has the most listings. 
+California has the most listings. The second is Texas. The third is New York.
 
 #### Borrower a Home Owner
 
@@ -240,11 +239,12 @@ ggplot(dd_s, aes(x = IsBorrowerHomeowner)) +
 
 ```
 
+There are around 1000 more home owners.
+
 ```{r}
 summary(dd_s$IsBorrowerHomeowner)
 ```
 
-There are around 1000 more home owners.
 
 #### Debt to Income Ratio
 
@@ -254,12 +254,11 @@ ggplot(dd_s, aes(x = DebtToIncomeRatio)) +
   geom_histogram()
 ```
 
+More than 75% of the listings have a debt to income ratio less than 0.32.
+
 ```{r}
 summary(dd_s$DebtToIncomeRatio)
 ```
-
-More than 75% of the listings have a debt to income ratio less than 0.32.
-
 
 #### Loan Amount 
 
@@ -268,15 +267,12 @@ More than 75% of the listings have a debt to income ratio less than 0.32.
 ggplot(dd_s, aes(x = LoanOriginalAmount)) +
   geom_histogram()
 ```
- 
-
+  
+It shows a right skewed trend, mean 8447 > median 6500. 
 
 ```{r}
 summary(dd_s$LoanOriginalAmount)
 ```
-
- 
-It shows a right skewed trend, mean 8447 > median 6500. 
 
 #### Investors
 ```{r}
@@ -285,11 +281,11 @@ ggplot(dd_s, aes(x = Investors)) +
   geom_histogram()
 ```
 
+It is right skewed with a median of 44 and mean of 80.48.
+
 ```{r}
 summary(dd_s$Investors)
 ```
-
-It is right skewed with a median of 44 and mean of 80.48.
 
 ### Univariate Analysis
 
@@ -305,7 +301,7 @@ ggplot(na.omit(filter(dd_s)), aes(as.factor(ProsperRating..numeric.), LenderYiel
 It can be noticed that the yield decreases when rating increases.
 
 
-What is the trend when grouped by different loan status. 
+What is the trend when grouped by different loan status?
 
 ```{r }
 ##15
@@ -371,7 +367,8 @@ ggplot(na.omit(filter(dd_s)), aes(x = ListingCategory..numeric., y = LoanOrigina
   ggpubr::rotate_x_text()
 ```
 
-The top two categories that have the highest median loan amount are debt consolidation and baby and adoption. The third is wedding loans. It is interesting to find out that baby and adoption and wedding are expensive. 
+The top two categories that have the highest median loan amount are debt consolidation and baby and adoption. The third is wedding loans. It is interesting to find out that baby and adoption and wedding are expensive.
+
 #### Loan Amount and Investors
 
 ```{r}
@@ -404,7 +401,7 @@ ggplot(dd_s, aes(x = ListingCreationDate)) +
   theme_bw() +
   labs(x = 'month', y = 'Number of Listing') +
   scale_x_date(labels = date_format("%y-%m"), date_breaks = "2 month") +
-  ggtitle("Number of Listing Over the Time")
+  ggtitle("Number of Listing Over the Time") +
   ggpubr::rotate_x_text()
 
 ```
@@ -426,7 +423,8 @@ This is the plot of the relationship between lender yield and Propser rating. It
 ggplot(na.omit(filter(dd_s)), aes(x = LoanOriginalAmount, y = Investors)) +
   geom_point() +
   geom_smooth(color = 'orange') +
-  ggtitle("Relationship between Number of Investor and Loan Amount")
+  ggtitle("Relationship between Number of Investor and Loan Amount") +
+  ylab("Number of Investers")
 ```
 
 THis is the plot of the relationshop between number of investors and loan amount. I supposed that the larger loan amount, the more investors. The plot indicates that there is quite weak relationship between these two factors. 
