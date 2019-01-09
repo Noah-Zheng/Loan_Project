@@ -101,6 +101,7 @@ str(dd_s)
 #https://stackoverflow.com/questions/41855673/r-ggplot-display-all-dates-on-x-axis
 library(scales)
 library(ggpubr)
+##1
 ggplot(dd_s, aes(x = ListingCreationDate)) +
   geom_histogram() +
   theme_bw() +
@@ -113,10 +114,10 @@ ggplot(dd_s, aes(x = ListingCreationDate)) +
 It can be noticed that there is a big drop in listing from 2008-09. It takes almost 3 years for the listing to recover to 2008-07 level. What happened in September of 2008 relating to finance is the collapse of Lehman Brothers on September 15. Another information is of interest is that the Prosper rating is introduced in July 2009, when the listing starts to increase. Another sharp decline happened in 2014-03. It can be explored further with other information. 
 
 
-### The Term of Loans 
+#### The Term of Loans 
 
 ```{r}
-#bar plot of terms
+##2 bar plot of terms
 ggplot(dd_s, aes(x=factor(Term))) +
   geom_bar()
 ```
@@ -126,6 +127,7 @@ The majority of loans are with a term of 36 months. Loans with 12 months are qui
 
 #### Loan Status
 ```{r}
+##3 bar plot of loan status
 ggplot(dd_s, aes(x = LoanStatus)) +
   geom_bar() + 
   geom_text(stat = 'count', aes(label = ..count..), vjust=-1) +
@@ -138,6 +140,7 @@ The majority of loans are current. The second is completed. The third is charged
 #### The Borrower Rate
 
 ```{r}
+##4 histogram of borrower rate
 ggplot(dd_s, aes(x = BorrowerRate)) +
   geom_histogram()
 ```
@@ -151,6 +154,7 @@ summary(dd_s$BorrowerRate)
 
 #### Lender Yield
 ```{r}
+##5 histogram of lender yield
 ggplot(dd_s, aes(x = LenderYield)) +
   geom_histogram()
 ```
@@ -164,6 +168,7 @@ summary(dd_s$LenderYield)
 #### Prosper Rating 
 
 ```{r}
+##6 bar plot of prosper rating
 ggplot(dd_s, aes(x=factor(ProsperRating..numeric.))) +
   geom_bar()
 ```
@@ -172,6 +177,7 @@ The distribution of rating is close to a normal distribution except for the NA w
 
 #### Prosper Score
 ```{r}
+##7 histogram of prosper score
 ggplot(dd_s, aes(x = ProsperScore)) +
   geom_histogram() +
   scale_x_continuous(breaks = seq(1,11,1))
@@ -190,7 +196,7 @@ The category of the listing that the borrower selected when posting their listin
 
 ```{r}
 #https://stackoverflow.com/questions/10002536/how-do-i-replace-numeric-codes-with-value-labels-from-a-lookup-table
-
+# convert listing categories into readable names
 a <- 0:20
 names(a) <- c('Not Available', 'Debt Consolidation', 'Home Improvement', 'Business', 'Personal Loan', 'Student Use', 'Auto', 'Other', 'Baby&Adoption', 'Boat', 'Cosmetic Procedure', 'Engagement Ring', 'Green Loans', 'Household Expenses', 'Large Purchases', 'Medical/Dental', 'Motorcycle', 'RV', 'Taxes', 'Vacation', 'Wedding Loans')
 
@@ -200,7 +206,7 @@ dd_s$ListingCategory..numeric. <- names(a)[match(dd_s$ListingCategory..numeric.,
 
 ```{r}
 #https://stackoverflow.com/questions/37853539/how-to-draw-sorted-frequency-barplot-with-ggplot-in-r
-
+##8 bar plot of listing category
 ggplot(dd_s, aes(x = reorder(ListingCategory..numeric., ListingCategory..numeric., function(x) -length(x)))) +
   geom_bar() +
   xlab("Category") +
@@ -214,6 +220,7 @@ Most of the listing falls in Debt Consolidation.
 #### Borrowing State
 
 ```{r}
+##9 bar plot of borrwoing state
 ggplot(dd_s, 
        aes(x=reorder(BorrowerState, BorrowerState, function(x) - length(x))
            )
@@ -227,6 +234,7 @@ California has the most listings.
 #### Borrower a Home Owner
 
 ```{r}
+##10 bar plot of home owner
 ggplot(dd_s, aes(x = IsBorrowerHomeowner)) +
   geom_bar()
 
@@ -241,6 +249,7 @@ There are around 1000 more home owners.
 #### Debt to Income Ratio
 
 ```{r}
+##11 histogram of debt to income ratio
 ggplot(dd_s, aes(x = DebtToIncomeRatio)) +
   geom_histogram()
 ```
@@ -255,7 +264,7 @@ More than 75% of the listings have a debt to income ratio less than 0.32.
 #### Loan Amount 
 
 ```{r }
-#plot of LoanOriginalAmount
+##12 plot of LoanOriginalAmount
 ggplot(dd_s, aes(x = LoanOriginalAmount)) +
   geom_histogram()
 ```
@@ -271,6 +280,7 @@ It shows a right skewed trend, mean 8447 > median 6500.
 
 #### Investors
 ```{r}
+##13 histogram of investors 
 ggplot(dd_s, aes(x = Investors)) +
   geom_histogram()
 ```
@@ -281,163 +291,156 @@ summary(dd_s$Investors)
 
 It is right skewed with a median of 44 and mean of 80.48.
 
-
 ### Univariate Analysis
 
-
-### The Relationship between the Yield and Rating 
+#### The Relationship between the Yield and Rating 
 
 ```{r }
-ggplot(dd_s, aes(ProsperRating, LenderYield)) +
-  geom_point(alpha = 1/50, position = position_jitter())
+##14
+ggplot(na.omit(filter(dd_s)), aes(as.factor(ProsperRating..numeric.), LenderYield)) +
+  geom_boxplot(alpha=0.4, color="orange") +
+  geom_point(stat = "summary", fun.y = mean, size = 4, shape=23)
 ```
  
-It can be noticed that the yield decreases when rating increases. Listings with 1 and 4 have noticiable yield differ from the majority. 
+It can be noticed that the yield decreases when rating increases.
 
-A line plot to show the trend. 
 
-```{r }
-ggplot(dd_s, aes(ProsperRating, LenderYield)) +
-  geom_line(stat = "summary", fun.y = "mean")
-```
- 
-A strong negative relationship between the average yield and rating exists. 
-
-Group by different loan status. 
+What is the trend when grouped by different loan status. 
 
 ```{r }
-ggplot(dd_s, aes(ProsperRating, LenderYield)) +
+##15
+ggplot(dd_s, aes(ProsperRating..numeric., LenderYield)) +
   geom_line(aes(color = LoanStatus), stat = "summary", fun.y = mean)
 ```
- 
-Too many lines. Group all the past due into one catagory.
+
+They all share the same trend, lender yield decreasing when prosper rating increasing. 
+
+
+#### Exploring the Relationship between Yield and Loan Amount 
+
 
 ```{r }
-#combine all past dues in one level 
-dd_s$Status <- dd_s$LoanStatus
-#find out the index of the past due levels
-#levels(dd_s$Status)
-levels(dd_s$Status)[7:12] <- "Past Due"
-#check the result
-#levels(dd_s$Status)
-```
- 
-Line plot wiht one past due. 
-
-```{r}
-ggplot(dd_s, aes(ProsperRating, LenderYield)) +
-  geom_line(aes(color = Status), stat = "summary", fun.y = mean)
-```
- 
-Different status shows the same trend.
-
-
-### Exploring the Rrelationship between Yield and Loan Amount 
-
-```{r}
-#scatter plot of the relationship between yield and loan amount
-ggplot(dd_s, aes(LoanOriginalAmount, LenderYield)) +
-  geom_point(alpha = 1/50, position = position_jitter())
-```
- 
-The average yield seems to decrease when the amount increases. 
-
-Add a smooth line in the scatter plot. 
-
-```{r }
-#add a smooth line in the scatter plot 
+##16  
 ggplot(dd_s, aes(LoanOriginalAmount, LenderYield)) +
   geom_point(alpha = 1/50, position = position_jitter())+
   geom_smooth(color = "red")
 ```
 
-No clear pattern.
-
-### Exploring the Distribution of Yield in Different Loan Status. 
-
-```{r }
-qplot(data=dd_s, LenderYield) +
-  facet_wrap(~Status, scales="free")
-```
-
-There is a relative big number of listings with yield more than 0.3 in all the loan status levels except current. 
+No clear pattern. It seems that there is no clear relationship between loan amount and lender yield. I supposed that the lender yield may increase when the loan amount increases. 
 
 
-### The Relationship between Loan Amount and Rating. 
+#### The Relationship between Loan Amount and Rating. 
 
 ```{r }
-ggplot(dd_s, aes(ProsperRating, LoanOriginalAmount)) +
-  geom_point(alpha = 1/50, position = position_jitter())
-```
+##17
+dd_s <- dd_s %>% mutate(
+  Status = ifelse(
+    LoanStatus %in% c('Chargedoff', 'Defaulted'), 0,
+    ifelse(
+      LoanStatus %in% 
+        c("Completed", "Current", "FinalPaymentInProgress"), 1,
+      ifelse(
+        LoanStatus %in% 'Canclled', 2, 3
+      )
+    )
+  )
+)
 
-Listings with high risk tends to have low amount that that with low risk. 
- 
-Use line pot to see the trend.
-
-```{r }
-ggplot(dd_s, aes(ProsperRating, LoanOriginalAmount)) +
-  geom_line(stat = "summary", fun.y = "mean") +
-  ylim(0,quantile(dd_s$LoanOriginalAmount, .99))
-```
-
-The average loan amount for listings with rating of 1 is around 3000, increasing to more than 10000 with rating 4. 
-
-Group by loan status.
-
-```{r }
-ggplot(dd_s, aes(ProsperRating, LoanOriginalAmount)) +
-  geom_line(aes(color = Status), stat = "summary", fun.y = "mean") +
-  ylim(0,quantile(dd_s$LoanOriginalAmount, .99))
-```
+dd_s$Status <- factor(dd_s$Status, levels = 0:3, 
+                         labels = c("Defaulted", 
+                                    "Current or paid", 
+                                    "Canclled",
+                                    "Past due"))
 
 
-```{r }
-ggplot(dd_s, aes(ProsperRating, LoanOriginalAmount)) +
+ggplot(na.omit(filter(dd_s)), aes(ProsperRating..numeric., LoanOriginalAmount)) +
   geom_point(alpha = 1/100, position = position_jitter()) +
   geom_line(aes(color = Status), stat = "summary", fun.y = "mean") +
   ylim(0,quantile(dd_s$LoanOriginalAmount, .99))
 ```
 
-Put together the point plot and line plot to show the relationship between loan amount and prosper rating. 
+Listings with high risk tends to have low amount than that with low risk. It is probably that the borrowers with high risk know they cannot get a big loan. Defaulted loan has less loan amount on average than current or paid and past due loans. 
+
+
+#### Listing Category and Loan Amount
+
+```{r}
+##18 
+ggplot(na.omit(filter(dd_s)), aes(x = ListingCategory..numeric., y = LoanOriginalAmount)) +
+  geom_boxplot() +
+  ggpubr::rotate_x_text()
+```
+
+The top two categories that have the highest median loan amount are debt consolidation and baby and adoption. The third is wedding loans. It is interesting to find out that baby and adoption and wedding are expensive. 
+#### Loan Amount and Investors
+
+```{r}
+##19
+ggplot(na.omit(filter(dd_s)), aes(x = LoanOriginalAmount, y = Investors)) +
+  geom_point() +
+  geom_smooth(color = 'orange')
+```
+
+The line indicates the trend of number of investors along the loan amount. After 20000, the trend of the number of investors remains stable. 
+### Multivariate Plots
+
+#### Lender Yield, Prosper Rate and Term
+```{r}
+##20 
+ggplot(na.omit(filter(dd_s, DebtToIncomeRatio < 1)), 
+               aes(ProsperRating..numeric., LenderYield,                                   color=ProsperRating..numeric.)) +
+    geom_point(alpha = 0.8, position = "jitter") +
+    facet_grid(.~ Term)
+```
+
+It can be noticed that the lender yield all exhibit the same trend in three term categories. Lender yield decreases when Prosper rating increases. 
 
 ## Final Plots and Summary
 
 ### Plot 1
 ```{r }
-ggplot(dd_s, aes(ProsperRating, LenderYield)) +
-  geom_line(aes(color = Status), stat = "summary", fun.y = mean)+
-  ggtitle("Relationship Between Yield and Rating") +
-  ylab("LenderYield(%)")
+ggplot(dd_s, aes(x = ListingCreationDate)) +
+  geom_histogram() +
+  theme_bw() +
+  labs(x = 'month', y = 'Number of Listing') +
+  scale_x_date(labels = date_format("%y-%m"), date_breaks = "2 month") +
+  ggtitle("Number of Listing Over the Time")
+  ggpubr::rotate_x_text()
 
 ```
 
-As guessed in the question part, there is a strong negative relationship between the rating and yield, highest rating with lowest yield. All status show the same trend.
+This is the plot of number of listing spread over the period from July 2005 to Sept. 2014. There is a deep decrease in the Q4 2018. What happened then is the financial crisis.The listing started to recover around July 2009 when Prosper introduced the Prosper rating. The listing started to prosper around Jan. 2013 and reached its highest in Nov. 2013 and then declined. 
 
 ### Plot 2
 ```{r }
-qplot(data=dd_s, LenderYield) +
-  facet_wrap(~Status, scales="free")+
-  ggtitle("LenderYield in Different Status") +
-  ylab("count")
+ggplot(dd_s, aes(ProsperRating..numeric., LenderYield)) +
+  geom_line(aes(color = LoanStatus), stat = "summary", fun.y = mean)+
+  ggtitle("The Relationship between Lender Yield and Prosper Rating") +
+  ylab("Lender Yield")
 ```
 
-High yield means high risk. Therefore, there can be expected more loan with high yield in status of charged off, defaulted and past due.  It is interesting to find that in the completed and current status, there is quit an amount of listings with 0.3 yield.
+This is the plot of the relationship between lender yield and Propser rating. It indicates that, no matter what loan status, higher Prosper rating means lower lender yield. The average of lender yield is above 0.3 with rating of 1 and it decreases to around 0.1 with rating of 6.
 
 ### Plot 3
 ```{r }
-ggplot(dd_s, aes(ProsperRating, LoanOriginalAmount)) +
-  geom_point(alpha = 1/100, position = position_jitter()) +
-  geom_line(aes(color = Status), stat = "summary", fun.y = "mean") +
-  ylim(0,quantile(dd_s$LoanOriginalAmount, .99)) +
-  ggtitle("Relationship Between Loan Amount and Rating") +
-  ylab("Loan Amount(USD)")
+ggplot(na.omit(filter(dd_s)), aes(x = LoanOriginalAmount, y = Investors)) +
+  geom_point() +
+  geom_smooth(color = 'orange') +
+  ggtitle("Relationship between Number of Investor and Loan Amount")
 ```
 
-Listing with low risk will have higher average loan amount.
+THis is the plot of the relationshop between number of investors and loan amount. I supposed that the larger loan amount, the more investors. The plot indicates that there is quite weak relationship between these two factors. 
 
 ## Reflection
-It is very hard to ask a beautiful question. The main question in this analysis is very simple: the relationship between the lender yield and prosper rating of the loan. As expected, it is a negative relationship.  
- 
-It is hard to find other meaningful insights into the relatinships between those variables. It is intersting to find out that there is a positive relationship between the loan amount and rating. I expected that lower amount has higher rating. Then I put myself in the shoes of a borrower and I realised that I will only borrow large amount of money when I am confident that I will get the loan which means I assess myself with a higher rating and lower risk. 
+
+I spent a lot of time exploring the dataset to understanding the meaning of each variables. This dataset has 81 variables and I have to understanding all of them and then to choose the variables of interest for data analysis.
+
+
+I got lost when exploring some of the variables at times. There are no obvious trend in some of the variable and I have to go back and forth to try the coorrelation between different variables. 
+
+As shown in Plot 1, there is a obvious decline in Q4 2008 and Prosper has made some change in July 2009. There should be some other information that can reveal more about how Prosper made the change. I tried but failed. I realised that if you want to dig into the data to find more useful insight you have to understanding data. Otherwise, R can only help to find some obvious observation such as the positive relationship between the Prosper rating and lender yield. 
+
+
+
  
 
