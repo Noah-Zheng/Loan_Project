@@ -1,12 +1,21 @@
 ---
-title: "Loan_Project"
-output: html_document
+title: "Prosper Loan Data"
+author: "Noah Zheng"
+date: "January 9, 2019"
+output: 
+  html_document:
+    toc: true
+    toc_depth: 3
+    toc_float: true
+    theme: lumen
+    highlight: textmate
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(fig.width=10,fig.height=7,fig.path='Figs/',
                       fig.align='center',tidy=TRUE,
                       echo=FALSE,warning=FALSE,message=FALSE)
+
 ```
 
 
@@ -130,8 +139,8 @@ The majority of loans are with a term of 36 months. Loans with 12 months are qui
 ##3 bar plot of loan status
 ggplot(dd_s, aes(x = LoanStatus)) +
   geom_bar() + 
-  geom_text(stat = 'count', aes(label = ..count..), vjust=-1) +
-  ggpubr::rotate_x_text()
+  geom_text(stat = 'count', aes(label = ..count..), hjust=-0.15) +
+  coord_flip(ylim = c(0,62000))
 ```
 
 The majority of loans are current. The second is completed. The third is charged off. The fourth is defaulted. 
